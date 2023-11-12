@@ -25,7 +25,7 @@ namespace EaindrayDotNetCore.ConsoleApp.AdoDotNetExamples
             sqlConnectionStringBuilder = new SqlConnectionStringBuilder
             {
                 DataSource = ".", // server name
-                InitialCatalog = "ALTDotNetCore",
+                InitialCatalog = "TestDb",
                 UserID = "sa",
                 Password = "sa@123",
             };
