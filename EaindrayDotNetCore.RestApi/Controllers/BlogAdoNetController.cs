@@ -18,7 +18,7 @@ namespace EaindrayDotNetCore.RestApi.Controllers
         public BlogAdoNetController()
         {
             // Set up the connection string
-            connectionString = "Data Source=.;Initial Catalog=ALTDotNetCore;User ID=sa;Password=sa@123";
+            connectionString = "Server=.;Database=ALTDotNetCore;User Id=sa;Password=sa@123; Encrypt=True; Trusted_Connection=True;TrustServerCertificate=True;";
         }
 
         [HttpGet]

@@ -22,9 +22,12 @@ namespace EaindrayDotNetCore.RestApi.Controllers
                 InitialCatalog = "ALTDotNetCore",
                 UserID = "sa",
                 Password = "sa@123",
+                Encrypt = true,
+                
+                TrustServerCertificate=true
             };
         }
-
+        //Server=.;Database=ALTDotNetCore;User Id=sa;Password=sa@123; Encrypt=True; Trusted_Connection=True;TrustServerCertificate=True;
         [HttpGet]
         public IActionResult GetBlogs()
         {
