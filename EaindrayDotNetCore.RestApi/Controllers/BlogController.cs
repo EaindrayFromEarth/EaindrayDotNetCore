@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Reflection.Metadata;
+using AKKLTZDotNetCore.RestApi.Models;
 
 namespace EaindrayDotNetCore.RestApi.Controllers
 {

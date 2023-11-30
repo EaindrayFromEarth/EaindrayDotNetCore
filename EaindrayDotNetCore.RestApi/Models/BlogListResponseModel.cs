@@ -1,4 +1,6 @@
-﻿namespace EaindrayDotNetCore.RestApi.Models
+﻿using AKKLTZDotNetCore.RestApi.Models;
+
+namespace EaindrayDotNetCore.RestApi.Models
 {
     public class BlogListResponseModel
     {

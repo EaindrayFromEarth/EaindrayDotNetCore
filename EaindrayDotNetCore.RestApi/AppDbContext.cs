@@ -1,4 +1,4 @@
-﻿using EaindrayDotNetCore.RestApi.Models;
+﻿using AKKLTZDotNetCore.RestApi.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,20 +13,12 @@ namespace EaindrayDotNetCore.RestApi
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //if (optionsBuilder.IsConfigured == false)
             if (!optionsBuilder.IsConfigured)
             {
-                var sqlConnectionStringBuilder = new SqlConnectionStringBuilder
-                {
-                    DataSource = ".", // server name
-                    InitialCatalog = "ALTDotNetCore",
-                    UserID = "sa",
-                    Password = "sa@123",
-                    TrustServerCertificate = true
-                };
-                optionsBuilder.UseSqlServer(sqlConnectionStringBuilder.ConnectionString);
+                optionsBuilder.UseSqlServer("Server=.;Database=ALTDotNetCore;User Id=sa;Password=sa@123; Encrypt=True; Trusted_Connection=True;TrustServerCertificate=True;");
             }
         }
+
 
         public DbSet<BlogDataModel> Blogs { get; set; }
     }
