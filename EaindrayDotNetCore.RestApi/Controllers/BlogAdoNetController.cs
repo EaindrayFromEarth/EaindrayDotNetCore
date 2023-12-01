@@ -115,11 +115,15 @@ namespace EaindrayDotNetCore.RestApi.Controllers
                 {
                     connection.Open();
 
-                    string query = @"INSERT INTO tbl_blog (Blog_Title, Blog_Author, Blog_Content)
-                                    VALUES (@Blog_Title, @Blog_Author, @Blog_Content)";
+                    string query = @"INSERT INTO [dbo].[Tbl_Blog]
+                    ([Blog_Id], [Blog_Title], [Blog_Author], [Blog_Content])
+             VALUES
+                    (@Blog_Id, @Blog_Title, @Blog_Author, @Blog_Content)";
+
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
+                        command.Parameters.AddWithValue("@Blog_Id", blog.Blog_Id);
                         command.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
                         command.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
                         command.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);

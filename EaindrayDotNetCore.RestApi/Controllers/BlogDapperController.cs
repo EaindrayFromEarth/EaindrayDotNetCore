@@ -61,13 +61,10 @@ namespace EaindrayDotNetCore.RestApi.Controllers
         public IActionResult CreateBlog(BlogDataModel blog)
         {
             string query = @"INSERT INTO [dbo].[Tbl_Blog]
-           ([Blog_Title]
-           ,[Blog_Author]
-           ,[Blog_Content])
-     VALUES
-           (@Blog_Title
-           ,@Blog_Author
-           ,@Blog_Content)";
+                    ([Blog_Id], [Blog_Title], [Blog_Author], [Blog_Content])
+             VALUES
+                    (@Blog_Id, @Blog_Title, @Blog_Author, @Blog_Content)";
+
 
             using IDbConnection db = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
             int result = db.Execute(query, blog);
