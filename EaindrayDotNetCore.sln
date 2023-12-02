@@ -5,7 +5,15 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EaindrayDotNetCore.ConsoleApp", "EaindrayDotNetCore.ConsoleApp\EaindrayDotNetCore.ConsoleApp.csproj", "{148C7E4E-7ED9-44CB-9F29-952924DFC87D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaindrayDotNetCore.RestApi", "EaindrayDotNetCore.RestApi\EaindrayDotNetCore.RestApi.csproj", "{F401B89E-7FED-4759-8F54-9589F31230BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EaindrayDotNetCore.RestApi", "EaindrayDotNetCore.RestApi\EaindrayDotNetCore.RestApi.csproj", "{F401B89E-7FED-4759-8F54-9589F31230BA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EaindrayDotNetCore.JqueryApp", "EaindrayDotNetCore.JqueryApp", "{E04CC552-2844-418A-B92E-34995A68CF1F}"
+	ProjectSection(SolutionItems) = preProject
+		EaindrayDotNetCore.JqueryApp\counter.html = EaindrayDotNetCore.JqueryApp\counter.html
+		EaindrayDotNetCore.JqueryApp\index.html = EaindrayDotNetCore.JqueryApp\index.html
+		EaindrayDotNetCore.JqueryApp\json-test.html = EaindrayDotNetCore.JqueryApp\json-test.html
+		EaindrayDotNetCore.JqueryApp\local-storage.html = EaindrayDotNetCore.JqueryApp\local-storage.html
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
