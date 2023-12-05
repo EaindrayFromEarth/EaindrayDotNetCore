@@ -9,99 +9,89 @@ using AKKLTZDotNetCore.RestApi.Models;
 
 namespace EaindrayDotNetCore.RestApi.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
-    public class BlogAdoNetController : ControllerBase
+    public class BlogAdoDotNetController : ControllerBase
     {
-        private readonly string connectionString;
+        private readonly SqlConnectionStringBuilder sqlConnectionStringBuilder;
 
-        public BlogAdoNetController()
+        public BlogAdoDotNetController()
         {
-            // Set up the connection string
-            connectionString = "Server=.;Database=ALTDotNetCore;User Id=sa;Password=sa@123; Encrypt=True; Trusted_Connection=True;TrustServerCertificate=True;";
+            sqlConnectionStringBuilder = new SqlConnectionStringBuilder
+            {
+                DataSource = ".", 
+                InitialCatalog = "ALTDotNetCore",
+                UserID = "sa",
+                Password = "sa@123",
+                Encrypt = true,
+
+                TrustServerCertificate = true
+            };
         }
 
         [HttpGet]
         public IActionResult GetBlogs()
         {
-            try
+            SqlConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            string query = "select * from tbl_blog";
+            SqlCommand cmd = new SqlCommand(query, connection);
+            SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+
+            connection.Close();
+
+            List<BlogDataModel> lst = new List<BlogDataModel>();
+
+            foreach (DataRow row in dt.Rows)
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string query = "SELECT * FROM tbl_blog";
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        SqlDataReader reader = command.ExecuteReader();
-
-                        List<BlogDataModel> lst = new List<BlogDataModel>();
-                        while (reader.Read())
-                        {
-                            BlogDataModel blog = new BlogDataModel
-                            {
-                                Blog_Id = Convert.ToInt32(reader["Blog_Id"]),
-                                Blog_Title = reader["Blog_Title"].ToString(),
-                                Blog_Author = reader["Blog_Author"].ToString(),
-                                Blog_Content = reader["Blog_Content"].ToString()
-                            };
-                            lst.Add(blog);
-                        }
-
-                        reader.Close();
-
-                        BlogListResponseModel model = new BlogListResponseModel
-                        {
-                            IsSuccess = true,
-                            Message = "Success",
-                            Data = lst
-                        };
-                        return Ok(model);
-                    }
-                }
+                BlogDataModel item = new BlogDataModel();
+                item.Blog_Id = Convert.ToInt32(row["Blog_Id"]);
+                item.Blog_Title = row["Blog_Id"].ToString();
+                item.Blog_Author = row["Blog_Title"].ToString();
+                item.Blog_Content = row["Blog_Content"].ToString();
+                lst.Add(item);
             }
-            catch (Exception ex)
+            BlogListResponseModel model = new BlogListResponseModel
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { IsSuccess = false, Message = ex.Message });
-            }
+                IsSuccess = true,
+                Message = "Success",
+                Data = lst
+            };
+            return Ok(model);
         }
 
         [HttpGet("{id}")]
         public IActionResult GetBlog(int id)
         {
-            BlogDataModel item = null;
+            SqlConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
+            connection.Open();
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            string query = "select * from tbl_blog where Blog_Id = @Blog_Id";
+            SqlCommand cmd = new SqlCommand(query, connection);
+            cmd.Parameters.AddWithValue("@Blog_Id", id);
+            SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+
+            connection.Close();
+
+            if (dt.Rows.Count == 0)
             {
-                connection.Open();
-
-                string query = "SELECT * FROM tbl_blog WHERE Blog_Id = @Blog_Id";
-
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Blog_Id", id);
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            item = new BlogDataModel
-                            {
-                                Blog_Id = Convert.ToInt32(reader["Blog_Id"]),
-                                Blog_Title = reader["Blog_Title"].ToString(),
-                                Blog_Author = reader["Blog_Author"].ToString(),
-                                Blog_Content = reader["Blog_Content"].ToString()
-                            };
-                        }
-                    }
-                }
-            }
-
-            if (item == null)
-            {
-                var response = new { IsSuccess = false, Message = "No data found." };
+                var response = new { IsSuccess = false, Message = "No data found!" };
                 return NotFound(response);
             }
+
+            DataRow row = dt.Rows[0];
+
+            BlogDataModel item = new BlogDataModel();
+            item.Blog_Id = Convert.ToInt32(row["Blog_Id"]);
+            item.Blog_Title = row["Blog_Title"].ToString();
+            item.Blog_Author = row["Blog_Author"].ToString();
+            item.Blog_Content = row["Blog_Content"].ToString();
 
             return Ok(item);
         }
@@ -109,194 +99,148 @@ namespace EaindrayDotNetCore.RestApi.Controllers
         [HttpPost]
         public IActionResult CreateBlog(BlogDataModel blog)
         {
-            try
+            SqlConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            string query = @"INSERT INTO [dbo].[Tbl_Blog]
+                           ([Blog_Title]
+                           ,[Blog_Author]
+                           ,[Blog_Content])
+                            VALUES
+                           (@Blog_Title
+                            ,@Blog_Author
+                            ,@Blog_Content)";
+
+            SqlCommand cmd = new SqlCommand(query, connection);
+            cmd.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
+            cmd.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
+            cmd.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
+            int result = cmd.ExecuteNonQuery();
+
+            connection.Close();
+
+            BlogResponseModel model = new BlogResponseModel
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string query = @"INSERT INTO [dbo].[Tbl_Blog]
-                    ([Blog_Id], [Blog_Title], [Blog_Author], [Blog_Content])
-             VALUES
-                    (@Blog_Id, @Blog_Title, @Blog_Author, @Blog_Content)";
-
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Blog_Id", blog.Blog_Id);
-                        command.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
-                        command.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
-                        command.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
-
-                        int result = command.ExecuteNonQuery();
-
-                        BlogResponseModel model = new BlogResponseModel()
-                        {
-                            IsSuccess = result > 0,
-                            Message = result > 0 ? "Saving Successful." : "Saving Failed.",
-                            Data = blog
-                        };
-                        return Ok(model);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { IsSuccess = false, Message = ex.Message });
-            }
+                IsSuccess = result > 0,
+                Message = result > 0 ? "Saving successful." : "Saving failed.",
+                Data = blog
+            };
+            return Ok(model);
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateBlog(int id, BlogDataModel blog)
         {
-            try
+            SqlConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            string query = "select * from tbl_blog where Blog_Id = @Blog_Id";
+            SqlCommand cmd = new SqlCommand(query, connection);
+            cmd.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
+            cmd.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
+            cmd.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
+            int result = cmd.ExecuteNonQuery();
+
+            connection.Close();
+
+            BlogResponseModel model = new BlogResponseModel
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string query = @"UPDATE tbl_blog
-                                    SET Blog_Title = @Blog_Title, Blog_Author = @Blog_Author, Blog_Content = @Blog_Content
-                                    WHERE Blog_Id = @Blog_Id";
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Blog_Id", id);
-                        command.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
-                        command.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
-                        command.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
-
-                        int result = command.ExecuteNonQuery();
-
-                        BlogResponseModel model = new BlogResponseModel()
-                        {
-                            IsSuccess = result > 0,
-                            Message = result > 0 ? "Updating Successful." : "Updating Failed.",
-                            Data = blog
-                        };
-                        return Ok(model);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { IsSuccess = false, Message = ex.Message });
-            }
+                IsSuccess = result > 0,
+                Message = result > 0 ? "Update successful." : "Update failed.",
+                Data = blog
+            };
+            return Ok(model);
         }
+
 
         [HttpPatch("{id}")]
         public IActionResult PatchBlog(int id, BlogDataModel blog)
         {
-            try
+            SqlConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
+            connection.Open();
+
+            string query = "select * from tbl_blog where Blog_Id=@Blog_Id";
+            SqlCommand cmd = new SqlCommand(query, connection);
+            cmd.Parameters.AddWithValue("@Blog_Id", id);
+
+            SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            adapter.Fill(dt);
+
+            connection.Close();
+
+            if (dt.Rows.Count == 0)
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    // Fetch the existing blog entry
-                    string selectQuery = "SELECT * FROM tbl_blog WHERE Blog_Id = @Blog_Id";
-                    using (SqlCommand selectCommand = new SqlCommand(selectQuery, connection))
-                    {
-                        selectCommand.Parameters.AddWithValue("@Blog_Id", id);
-
-                        using (SqlDataReader reader = selectCommand.ExecuteReader())
-                        {
-                            if (reader.Read())
-                            {
-                                // Update only the non-null properties using SqlCommand parameters
-                                string updateQuery = "UPDATE tbl_blog " +
-                                                     "SET Blog_Title = @Blog_Title, Blog_Author = @Blog_Author, Blog_Content = @Blog_Content " +
-                                                     "WHERE Blog_Id = @Blog_Id";
-
-                                using (SqlCommand updateCommand = new SqlCommand(updateQuery, connection))
-                                {
-                                    // Add parameters for the update command
-                                    updateCommand.Parameters.AddWithValue("@Blog_Id", id);
-
-                                    if (!string.IsNullOrEmpty(blog.Blog_Title))
-                                    {
-                                        updateCommand.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
-                                    }
-                                    else
-                                    {
-                                        updateCommand.Parameters.AddWithValue("@Blog_Title", reader["Blog_Title"]);
-                                    }
-
-                                    if (!string.IsNullOrEmpty(blog.Blog_Author))
-                                    {
-                                        updateCommand.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
-                                    }
-                                    else
-                                    {
-                                        updateCommand.Parameters.AddWithValue("@Blog_Author", reader["Blog_Author"]);
-                                    }
-
-                                    if (!string.IsNullOrEmpty(blog.Blog_Content))
-                                    {
-                                        updateCommand.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
-                                    }
-                                    else
-                                    {
-                                        updateCommand.Parameters.AddWithValue("@Blog_Content", reader["Blog_Content"]);
-                                    }
-
-                                    // Execute the update
-                                    int result = updateCommand.ExecuteNonQuery();
-
-                                    BlogResponseModel model = new BlogResponseModel()
-                                    {
-                                        IsSuccess = result > 0,
-                                        Message = result > 0 ? "Updating Successful." : "Updating Failed.",
-                                        Data = blog
-                                    };
-                                    return Ok(model);
-                                }
-                            }
-                        }
-                    }
-
-                    // No data found for the specified ID
-                    var response = new { IsSuccess = false, Message = "No data found." };
-                    return NotFound(response);
-                }
+                var response = new { IsSuccess = false, Message = "No data found." };
+                return NotFound(response);
             }
-            catch (Exception ex)
+
+            connection.Open();
+
+            SqlCommand command = new SqlCommand();
+            string conditions = "";
+
+            if (!string.IsNullOrEmpty(blog.Blog_Title))
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { IsSuccess = false, Message = ex.Message });
+                conditions += " [Blog_Title] = @Blog_Title, ";
+                command.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
             }
+            if (!string.IsNullOrEmpty(blog.Blog_Author))
+            {
+                conditions += " [Blog_Author] = @Blog_Author, ";
+                command.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
+            }
+            if (!string.IsNullOrEmpty(blog.Blog_Content))
+            {
+                conditions += " [Blog_Content] = @Blog_Content, ";
+                command.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
+            }
+            if (conditions.Length == 0)
+            {
+                var response = new { IsSuccess = false, Message = "No data to update." };
+                return NotFound(response);
+            }
+
+            conditions = conditions.Substring(0, conditions.Length - 2);
+
+            query = $@"UPDATE [dbo].[Tbl_Blog]
+                    SET {conditions}
+                    WHERE Blog_Id = @Blog_Id";
+
+            command.CommandText = query;
+            command.Connection = connection;
+            command.Parameters.AddWithValue("@Blog_Id", id);
+            int result = command.ExecuteNonQuery();
+
+            connection.Close();
+
+            BlogResponseModel model = new BlogResponseModel
+            {
+                IsSuccess = result > 0,
+                Message = result > 0 ? "Update Successful." : "Updating Failed.",
+                Data = blog
+            };
+            return Ok(model);
         }
 
 
         [HttpDelete("{id}")]
         public IActionResult DeleteBlog(int id)
         {
-            try
+            SqlConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
+            connection.Open();
+            string query = @"DELETE FROM [dbo].[Tbl_Blog] WHERE Blog_Id = @Blog_Id";
+            SqlCommand cmd = new SqlCommand(query, connection);
+            cmd.Parameters.AddWithValue("@Blog_Id", id);
+            int result = cmd.ExecuteNonQuery();
+            connection.Close();
+
+            BlogResponseModel model = new BlogResponseModel
             {
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string query = "DELETE FROM tbl_blog WHERE Blog_Id = @Blog_Id";
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Blog_Id", id);
-
-                        int result = command.ExecuteNonQuery();
-
-                        BlogResponseModel model = new BlogResponseModel()
-                        {
-                            IsSuccess = result > 0,
-                            Message = result > 0 ? "Deleting Successful." : "Deleting Failed."
-                        };
-                        return Ok(model);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { IsSuccess = false, Message = ex.Message });
-            }
+                IsSuccess = result > 0,
+                Message = result > 0 ? "Deleting successful." : "Deleting failed."
+            };
+            return Ok(model);
         }
     }
 }
