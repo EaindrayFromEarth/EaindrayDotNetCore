@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using EaindrayDotNetCore.RestApi.Models;
 using AKKLTZDotNetCore.RestApi.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EaindrayDotNetCore.RestApi.Controllers
 {
@@ -50,8 +51,8 @@ namespace EaindrayDotNetCore.RestApi.Controllers
             {
                 BlogDataModel item = new BlogDataModel();
                 item.Blog_Id = Convert.ToInt32(row["Blog_Id"]);
-                item.Blog_Title = row["Blog_Id"].ToString();
-                item.Blog_Author = row["Blog_Title"].ToString();
+                item.Blog_Title = row["Blog_Title"].ToString();
+                item.Blog_Author = row["Blog_Author"].ToString();
                 item.Blog_Content = row["Blog_Content"].ToString();
                 lst.Add(item);
             }
@@ -134,11 +135,16 @@ namespace EaindrayDotNetCore.RestApi.Controllers
             SqlConnection connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
             connection.Open();
 
-            string query = "select * from tbl_blog where Blog_Id = @Blog_Id";
+           string query = @"UPDATE [dbo].[Tbl_Blog]
+                            SET [Blog_Title] = @Blog_Title
+                                ,[Blog_Author] = @Blog_Author
+                                ,[Blog_Content] = @Blog_Content
+                            WHERE Blog_Id = @Blog_Id";
             SqlCommand cmd = new SqlCommand(query, connection);
             cmd.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
             cmd.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
             cmd.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
+            cmd.Parameters.AddWithValue("@Blog_Id", id);
             int result = cmd.ExecuteNonQuery();
 
             connection.Close();
