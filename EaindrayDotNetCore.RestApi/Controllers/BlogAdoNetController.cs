@@ -177,23 +177,23 @@ namespace EaindrayDotNetCore.RestApi.Controllers
 
             connection.Open();
 
-            SqlCommand command = new SqlCommand();
+            SqlCommand cmd2 = new SqlCommand();
             string conditions = "";
 
             if (!string.IsNullOrEmpty(blog.Blog_Title))
             {
                 conditions += " [Blog_Title] = @Blog_Title, ";
-                command.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
+                cmd2.Parameters.AddWithValue("@Blog_Title", blog.Blog_Title);
             }
             if (!string.IsNullOrEmpty(blog.Blog_Author))
             {
                 conditions += " [Blog_Author] = @Blog_Author, ";
-                command.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
+                cmd2.Parameters.AddWithValue("@Blog_Author", blog.Blog_Author);
             }
             if (!string.IsNullOrEmpty(blog.Blog_Content))
             {
                 conditions += " [Blog_Content] = @Blog_Content, ";
-                command.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
+                cmd2.Parameters.AddWithValue("@Blog_Content", blog.Blog_Content);
             }
             if (conditions.Length == 0)
             {
@@ -207,10 +207,10 @@ namespace EaindrayDotNetCore.RestApi.Controllers
                     SET {conditions}
                     WHERE Blog_Id = @Blog_Id";
 
-            command.CommandText = query;
-            command.Connection = connection;
-            command.Parameters.AddWithValue("@Blog_Id", id);
-            int result = command.ExecuteNonQuery();
+            cmd2.CommandText = query;
+            cmd2.Connection = connection;
+            cmd2.Parameters.AddWithValue("@Blog_Id", id);
+            int result = cmd2.ExecuteNonQuery();
 
             connection.Close();
 
