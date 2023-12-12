@@ -10,9 +10,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EaindrayDotNetCore.JqueryApp", "EaindrayDotNetCore.JqueryApp", "{E04CC552-2844-418A-B92E-34995A68CF1F}"
 	ProjectSection(SolutionItems) = preProject
 		EaindrayDotNetCore.JqueryApp\counter.html = EaindrayDotNetCore.JqueryApp\counter.html
+		datatable.html = datatable.html
+		date-picker.html = date-picker.html
 		EaindrayDotNetCore.JqueryApp\index.html = EaindrayDotNetCore.JqueryApp\index.html
 		EaindrayDotNetCore.JqueryApp\json-test.html = EaindrayDotNetCore.JqueryApp\json-test.html
+		ladda-button.html = ladda-button.html
 		EaindrayDotNetCore.JqueryApp\local-storage.html = EaindrayDotNetCore.JqueryApp\local-storage.html
+		radio-checkbox.html = radio-checkbox.html
+		toastify.html = toastify.html
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "js", "js", "{CCF8806F-35CA-428A-BA28-53C14641A03A}"

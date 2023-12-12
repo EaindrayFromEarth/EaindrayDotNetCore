@@ -13,7 +13,7 @@ namespace EaindrayDotNetCore.RestApi
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
+            if (!optionsBuilder.IsConfigured)  
             {
                 optionsBuilder.UseSqlServer("Server=.;Database=ALTDotNetCore;User Id=sa;Password=sa@123; Encrypt=True; Trusted_Connection=True;TrustServerCertificate=True;");
             }
