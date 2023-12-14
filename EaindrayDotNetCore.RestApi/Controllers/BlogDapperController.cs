@@ -12,179 +12,182 @@ namespace EaindrayDotNetCore.RestApi.Controllers
     [ApiController]
     public class BlogDapperController : ControllerBase
     {
-        private readonly SqlConnectionStringBuilder sqlConnectionStringBuilder;
+        private readonly SqlConnectionStringBuilder _sqlConnectionStringBuilder;
 
-        public BlogDapperController()
+        public BlogDapperController(IConfiguration configuration)
         {
-            sqlConnectionStringBuilder = new SqlConnectionStringBuilder
-            {
-                DataSource = ".", // server name
-                InitialCatalog = "ALTDotNetCore",
-                UserID = "sa",
-                Password = "sa@123",
-                Encrypt = true,
-                
-                TrustServerCertificate=true
-            };
+            string connectionString = configuration.GetConnectionString("DbConnection");
+            string connectionString2 = configuration.GetSection("SqlDbConnection").Value;
+            string connectionString3 = configuration.GetSection("MyDbConnections:MyDb:DbConnection").Value;
+            _sqlConnectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
         }
-        //Server=.;Database=ALTDotNetCore;User Id=sa;Password=sa@123; Encrypt=True; Trusted_Connection=True;TrustServerCertificate=True;
+
         [HttpGet]
         public IActionResult GetBlogs()
         {
-            string query = "select * from tbl_blog";
-            using IDbConnection db = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
+            string query = "select * from tbl_blog order by Blog_Id desc";
+            using IDbConnection db = new SqlConnection(_sqlConnectionStringBuilder.ConnectionString);
+
             List<BlogDataModel> lst = db.Query<BlogDataModel>(query).ToList();
-            BlogListResponseModel model = new BlogListResponseModel
+            BlogListResponseModel model = new BlogListResponseModel()
             {
                 IsSuccess = true,
                 Message = "Success",
-                Data = lst,
+                Data = lst
             };
+
             return Ok(model);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetBlog(int id)
+        public IActionResult CreateBlog([FromBody] BlogDataModel blog)
         {
-            string query = "select * from tbl_blog where Blog_Id = @Blog_Id";
-            using IDbConnection db = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            BlogDataModel? item = db.Query<BlogDataModel>(query, new BlogDataModel { Blog_Id = id }).FirstOrDefault();
-            if (item is null)
-            {
-                var response = new { IsSuccess = false, Message = "No data found." };
-                return NotFound(response);
-            }
-            return Ok(item);
-        }
+            string query = $@"INSERT INTO [dbo].[Tbl_Blog]
+           ([Blog_Title]
+           ,[Blog_Author]
+           ,[Blog_Content])
+     VALUES
+           (@Blog_Title
+           ,@Blog_Author
+           ,@Blog_Content)";
 
-        [HttpPost]
-        public IActionResult CreateBlog(BlogDataModel blog)
-        {
-            string query = @"INSERT INTO [dbo].[Tbl_Blog]
-                    ([Blog_Id], [Blog_Title], [Blog_Author], [Blog_Content])
-             VALUES
-                    (@Blog_Id, @Blog_Title, @Blog_Author, @Blog_Content)";
-
-
-            using IDbConnection db = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            int result = db.Execute(query, blog);
+            using IDbConnection db = new SqlConnection(_sqlConnectionStringBuilder.ConnectionString);
+            var result = db.Execute(query, blog);
+            string message = result > 0 ? "Saving Successful." : "Saving Failed.";
 
             BlogResponseModel model = new BlogResponseModel()
             {
                 IsSuccess = result > 0,
-                Message = result > 0 ? "Saving Successful." : "Saving Failed.",
-                Data = blog
+                Message = message,
             };
+            return Ok(model);
+        }
+
+        public IActionResult EditBlog(int id)
+        {
+            string query = "SELECT * FROM [Tbl_Blog] WHERE [Blog_Id] = @Blog_Id";
+
+            BlogDataModel dataModel = new BlogDataModel()
+            {
+                Blog_Id = id,
+            };
+
+            using IDbConnection db = new SqlConnection(_sqlConnectionStringBuilder.ConnectionString);
+            BlogDataModel item = db.Query<BlogDataModel>(query, dataModel).FirstOrDefault();
+
+            BlogResponseModel model = new BlogResponseModel();
+            if (item == null)
+            {
+                model.IsSuccess = false;
+                model.Message = "No Data Found!!";
+                return NotFound(model);
+            }
+
+            model.IsSuccess = true;
+            model.Message = "Success";
+            model.Data = item;
             return Ok(model);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateBlog(int id, BlogDataModel blog)
+        public IActionResult Update(int id, [FromBody] BlogDataModel blog)
         {
-            string query = "select * from tbl_blog where Blog_Id = @Blog_Id";
-            using IDbConnection db = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            BlogDataModel? item = db.Query<BlogDataModel>(query, new BlogDataModel { Blog_Id = id }).FirstOrDefault();
-            if (item is null)
+            string query = @"UPDATE [dbo].[Tbl_Blog]
+                             SET
+                             [Blog_Title] = @Blog_Title,
+                             [Blog_Author] = @Blog_Author,
+                             [Blog_Content] = @Blog_Content
+                             WHERE
+                             [Blog_Id] = @Blog_Id";
+
+            using IDbConnection db = new SqlConnection(_sqlConnectionStringBuilder.ConnectionString);
+            blog.Blog_Id = id;
+            var result = db.Execute(query, blog);
+
+            string message = result > 0 ? "Update Successful !!" : "Error While Update !!";
+
+            BlogResponseModel model = new BlogResponseModel();
+            model.IsSuccess = result > 0;
+            model.Message = message;
+
+            if (result < 0)
             {
-                var response = new { IsSuccess = false, Message = "No data found." };
-                return NotFound(response);
+                return NotFound(model);
             }
-
-            query = @"UPDATE [dbo].[Tbl_Blog]
-                            SET [Blog_Title] = @Blog_Title
-                                ,[Blog_Author] = @Blog_Author
-                                ,[Blog_Content] = @Blog_Content
-                            WHERE Blog_Id = @Blog_Id";
-
-            using IDbConnection db2 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            int result = db2.Execute(query, blog);
-
-            BlogResponseModel model = new BlogResponseModel()
-            {
-                IsSuccess = result > 0,
-                Message = result > 0 ? "Updating Successful." : "Updating Failed.",
-                Data = item
-            };
+            model.Data = blog;
             return Ok(model);
         }
 
         [HttpPatch("{id}")]
-        public IActionResult PatchBlog(int id, BlogDataModel blog)
+        public IActionResult PatchStudent(int id, [FromBody] BlogDataModel blog)
         {
-            string query = "select * from tbl_blog where Blog_Id = @Blog_Id";
-            using IDbConnection db = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            BlogDataModel? item = db.Query<BlogDataModel>(query, new BlogDataModel { Blog_Id = id }).FirstOrDefault();
-            if (item is null)
+            string query = "SELECT * FROM [Tbl_Blog] WHERE [Blog_Id] = @Blog_Id";
+            blog.Blog_Id = id;
+            using IDbConnection db = new SqlConnection(_sqlConnectionStringBuilder.ConnectionString);
+            var item = db.Query<BlogDataModel>(query, blog).FirstOrDefault();
+
+            BlogResponseModel responseModle = new BlogResponseModel();
+
+            if (item == null)
             {
-                var response = new { IsSuccess = false, Message = "No data found." };
-                return NotFound(response);
+                responseModle.IsSuccess = false;
+                responseModle.Message = "No Data Found!!";
+                return NotFound(responseModle);
             }
 
-            string conditions = ""; //0
+            string query1 = @"UPDATE [dbo].[Tbl_Blog]
+                             SET
+                             [Blog_Title] = @Blog_Title,
+                             [Blog_Author] = @Blog_Author,
+                             [Blog_Content] = @Blog_Content
+                             WHERE
+                             [Blog_Id] = @Blog_Id";
 
-            if (!string.IsNullOrEmpty(blog.Blog_Title))
+            if (!string.IsNullOrWhiteSpace(blog.Blog_Title))
             {
-                conditions += " [Blog_Title] = @Blog_Title, ";
                 item.Blog_Title = blog.Blog_Title;
             }
-            if (!string.IsNullOrEmpty(blog.Blog_Author))
+            if (!string.IsNullOrWhiteSpace(blog.Blog_Author))
             {
-                conditions += " [Blog_Author] = @Blog_Author, ";
                 item.Blog_Author = blog.Blog_Author;
             }
-            if (!string.IsNullOrEmpty(blog.Blog_Content))
+            if (!string.IsNullOrWhiteSpace(blog.Blog_Content))
             {
-                conditions += " [Blog_Content] = @Blog_Content, ";
                 item.Blog_Content = blog.Blog_Content;
             }
-            if (conditions.Length == 0)
-            {
-                var response = new { IsSuccess = false, Message = "No data to update." };
-                return NotFound(response);
-            }
 
-            conditions = conditions.Substring(0, conditions.Length - 2);
+            var result = db.Execute(query1, item);
 
-            query = $@"UPDATE [dbo].[Tbl_Blog]
-                            SET {conditions}
-                            WHERE Blog_Id = @Blog_Id";
+            string message = result > 0 ? "Updating Successful." : "Updating Failed.";
 
-            using IDbConnection db2 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            int result = db2.Execute(query, blog);
-
-            BlogResponseModel model = new BlogResponseModel()
-            {
-                IsSuccess = result > 0,
-                Message = result > 0 ? "Updating Successful." : "Updating Failed.",
-                Data = item
-            };
-            return Ok(model);
+            responseModle.IsSuccess = result > 0;
+            responseModle.Message = message;
+            return Ok(responseModle);
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteBlog(int id)
+        public IActionResult DeleteStudent(int id)
         {
-            string query = "select * from tbl_blog where Blog_Id = @Blog_Id";
-            using IDbConnection db = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            BlogDataModel? item = db.Query<BlogDataModel>(query, new BlogDataModel { Blog_Id = id }).FirstOrDefault();
-            if (item is null)
+            string query = @"DELETE FROM [dbo].[Tbl_Blog] WHERE [Blog_Id] = @Blog_Id";
+
+            BlogDataModel item = new BlogDataModel()
             {
-                var response = new { IsSuccess = false, Message = "No data found." };
-                return NotFound(response);
-            }
-
-            query = @"
-                            DELETE FROM [dbo].[Tbl_Blog]
-                            WHERE Blog_Id = @Blog_Id";
-
-            using IDbConnection db2 = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-            int result = db2.Execute(query, new BlogDataModel { Blog_Id = id });
-
-            BlogResponseModel model = new BlogResponseModel()
-            {
-                IsSuccess = result > 0,
-                Message = result > 0 ? "Deleting Successful." : "Deleting Failed.",
+                Blog_Id = id,
             };
+
+            using IDbConnection db = new SqlConnection(_sqlConnectionStringBuilder.ConnectionString);
+            var result = db.Execute(query, item);
+
+            string message = result > 0 ? "Delete Successful !!" : "Error While Delete !!";
+
+            BlogResponseModel model = new BlogResponseModel();
+            if (result > 0)
+            {
+                model.IsSuccess = result > 0;
+                model.Message = message;
+                return Ok(model);
+            }
+            model.IsSuccess = result > 0;
+            model.Message = message;
             return Ok(model);
         }
     }
