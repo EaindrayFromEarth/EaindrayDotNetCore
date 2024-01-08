@@ -1,133 +1,198 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
+﻿using AKKLTZDotNetCore.RestApi.Models;
+using EaindrayDotNetCore.RestApi.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EaindrayDotNetCore.RestApi.Controllers
 {
-    public class BlogAjaxController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BlogAjaxController : ControllerBase
     {
         private readonly AppDbContext _context;
-
         public BlogAjaxController(AppDbContext context)
         {
             _context = context;
         }
 
-        [ActionName("List")]
-        public async Task<IActionResult> BlogList(int pageNo = 1, int pageSize = 10)
-        {
-            BlogDataResponseModel model = new BlogDataResponseModel();
-            List<BlogDataModel> lst = _context.Blogs.AsNoTracking()
-                .Skip((pageNo - 1) * pageSize)
-            .Take(pageSize)
-                .ToList();
-
-            int rowCount = await _context.Blogs.CountAsync();
-            int pageCount = rowCount / pageSize;
-            if (rowCount % pageSize > 0)
-                pageCount++;
-
-            model.Blogs = lst;
-            model.PageSetting = new PageSettingModel(pageNo, pageSize, pageCount, "/blogajax/list");
-
-            return View("BlogList", model);
-        }
-
-        [ActionName("Create")]
-        public IActionResult BlogCreate()
-        {
-            return View("BlogCreate");
-        }
-
-        [HttpPost]
-        [ActionName("Save")]
-        public async Task<IActionResult> BlogSave(BlogDataModel reqModel)
-        {
-            await _context.Blogs.AddAsync(reqModel);
-            var result = await _context.SaveChangesAsync();
-            string message = result > 0 ? "Saving Successful." : "Saving Failed.";
-            TempData["Message"] = message;
-            TempData["IsSuccess"] = result > 0;
-
-            MessageModel model = new MessageModel(result > 0, message);
-            return Json(model);
-        }
-
         [HttpGet]
-        [ActionName("Edit")]
-        public async Task<IActionResult> BlogEdit(int id)
+        public IActionResult GetBlogs()
         {
-            var blog = await _context.Blogs.FirstOrDefaultAsync(x => x.Blog_Id == id);
-            if (blog is null)
+            List<BlogDataModel> lst = _context.Blogs.ToList();
+            BlogListResponseModel model = new BlogListResponseModel()
             {
-                TempData["Message"] = "No data found.";
-                TempData["IsSuccess"] = false;
-                return Redirect("/blogajax/list");
+                IsSuccess = true,
+                Message = "Success",
+                //Data = lst.Where(x => x.Blog_Title == "").OrderByDescending(x => x.Blog_Id).ToList()
+                Data = lst
+            };
+            return Ok(model);
+        }
+
+        [HttpGet("{pageNo}/{pageSize}")]
+        public IActionResult GetBlogs(int pageNo, int pageSize)
+        {
+            //pageNo = 1;
+            //pageSize = 10;
+            //int endRowNo = pageNo * pageSize;
+            //int startRowNo = endRowNo - pageSize + 1;
+            //// 1,  1 - 10 // 0
+            //// 2, 11 - 20 // 10
+            //// 3, 21 - 30 // 20, 21 - 30
+            List<BlogDataModel> lst = _context
+                .Blogs
+                .Skip((pageNo - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+            BlogListResponseModel model = new BlogListResponseModel()
+            {
+                IsSuccess = true,
+                Message = "Success",
+                //Data = lst.Where(x => x.Blog_Title == "").OrderByDescending(x => x.Blog_Id).ToList()
+                Data = lst
+            };
+            return Ok(model);
+        }
+
+        [HttpGet("{id}")]
+        public IActionResult GetBlog(int id)
+        {
+            BlogResponseModel model = new BlogResponseModel();
+
+            BlogDataModel item = _context.Blogs.FirstOrDefault(x => x.Blog_Id == id);
+            if (item is null)
+            {
+                model.IsSuccess = false;
+                model.Message = "No data found.";
+                return NotFound(model);
             }
-            return View("BlogEdit", blog);
+
+            model.IsSuccess = true;
+            model.Message = "Success";
+            model.Data = item;
+            return Ok(model);
         }
 
         [HttpPost]
-        [ActionName("Update")]
-        public async Task<IActionResult> BlogUpdate(int id, BlogDataModel reqModel)
+        public IActionResult CreateBlog([FromBody] BlogDataModel blog)
         {
-            var blog = await _context.Blogs.FirstOrDefaultAsync(x => x.Blog_Id == id);
-
-            if (blog != null)
+            _context.Blogs.Add(blog);
+            var result = _context.SaveChanges();
+            string message = result > 0 ? "Saving Successful." : "Saving Failed.";
+            BlogResponseModel model = new BlogResponseModel()
             {
-                blog.Blog_Title = reqModel.Blog_Title;
-                blog.Blog_Author = reqModel.Blog_Author;
-                blog.Blog_Content = reqModel.Blog_Content;
-
-                _context.Blogs.Update(blog);
-                var result = await _context.SaveChangesAsync();
-
-                string message = result > 0 ? "Update Successful." : "Update Failed.";
-                TempData["Message"] = message;
-                TempData["IsSuccess"] = result > 0;
-
-                MessageModel model = new MessageModel(result > 0, message);
-                return Json(model);
-            }
-
-            return Json(new MessageModel(false, "No Data Found to Update"));
+                IsSuccess = result > 0,
+                Message = message,
+            };
+            return Ok(model);
         }
 
-        [HttpPost]
-        [ActionName("Delete")]
-        public async Task<IActionResult> BlogDelete(BlogDataModel reqModel)
+        [HttpPut("{id}")]
+        public IActionResult UpdateBlog(int id, [FromBody] BlogDataModel blog)
         {
-            BlogDataModel? blog = await _context.Blogs.FirstOrDefaultAsync(x => x.Blog_Id == reqModel.Blog_Id);
+            BlogResponseModel model = new BlogResponseModel();
 
+            BlogDataModel item = _context.Blogs.FirstOrDefault(x => x.Blog_Id == id);
+            if (item == null)
+            {
+                model.IsSuccess = false;
+                model.Message = "No data found.";
+                return NotFound(model);
+            }
+
+            item.Blog_Title = blog.Blog_Title;
+            item.Blog_Author = blog.Blog_Author;
+            item.Blog_Content = blog.Blog_Content;
+
+            var result = _context.SaveChanges();
+            string message = result > 0 ? "Updating Successful." : "Updating Failed.";
+
+            model = new BlogResponseModel()
+            {
+                IsSuccess = result > 0,
+                Message = message,
+            };
+            return Ok(model);
+        }
+
+        //[HttpPatch("{id}")]
+        //public IActionResult PatchBlog(int id, [FromBody] JsonPatchDocument<BlogDataModel> blogPatch)
+        //{
+        //    AppDbContext db = new AppDbContext();
+        //    var blog = db.Blogs.FirstOrDefault(b => b.Blog_Id == id);
+
+        //    BlogResponseModel data = new BlogResponseModel();
+        //    if (blog is null)
+        //    {
+        //        data.IsSuccess = false;
+        //        data.Message = "No data found.";
+        //        return NotFound(data);
+        //    }
+
+        //    blogPatch.ApplyTo(blog);
+        //    db.SaveChanges();
+        //    data.IsSuccess = true;
+        //    data.Message = "Success";
+        //    data.Data = blog;
+
+        //    return Ok(data);
+        //}
+
+        [HttpPatch("{id}")]
+        public IActionResult PatchBlog(int id, [FromBody] BlogDataModel blog)
+        {
+            BlogResponseModel model = new BlogResponseModel();
+            var item = _context.Blogs.FirstOrDefault(x => x.Blog_Id == id);
+
+            if (item is null)
+            {
+                model.IsSuccess = false;
+                model.Message = "No data found.";
+                return NotFound(model);
+            }
+
+            if (!string.IsNullOrWhiteSpace(blog.Blog_Title))
+            {
+                item.Blog_Title = blog.Blog_Title;
+            }
+            if (!string.IsNullOrWhiteSpace(blog.Blog_Author))
+            {
+                item.Blog_Author = blog.Blog_Author;
+            }
+            if (!string.IsNullOrWhiteSpace(blog.Blog_Content))
+            {
+                item.Blog_Content = blog.Blog_Content;
+            }
+
+            var result = _context.SaveChanges();
+            string message = result > 0 ? "Updating Successful." : "Updating Failed.";
+
+            model = new BlogResponseModel()
+            {
+                IsSuccess = result > 0,
+                Message = message,
+            };
+
+            return Ok(model);
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteBlog(int id)
+        {
+            var blog = _context.Blogs.FirstOrDefault(b => b.Blog_Id == id);
+
+            BlogResponseModel data = new BlogResponseModel();
             if (blog is null)
             {
-                return Json(new MessageModel(false, "No data found."));
+                data.IsSuccess = false;
+                data.Message = "No data found.";
+                return NotFound(data);
             }
 
             _context.Blogs.Remove(blog);
-            var result = await _context.SaveChangesAsync();
-            string message = result > 0 ? "Your blog has been deleted." : "Deleting Failed.";
-            TempData["Message"] = message;
-            TempData["IsSuccess"] = result > 0;
-
-            MessageModel model = new MessageModel(result > 0, message);
-            return Json(model);
-        }
-    }
-
-    internal class PageSettingModel
-    {
-        private int pageNo;
-        private int pageSize;
-        private int pageCount;
-        private string v;
-
-        public PageSettingModel(int pageNo, int pageSize, int pageCount, string v)
-        {
-            this.pageNo = pageNo;
-            this.pageSize = pageSize;
-            this.pageCount = pageCount;
-            this.v = v;
+            _context.SaveChanges();
+            data.IsSuccess = true;
+            data.Message = "Success";
+            return Ok(data);
         }
     }
 }
