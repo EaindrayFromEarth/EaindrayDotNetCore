@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EaindrayDotNetCore.ConsoleApp.RefitExamples;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EaindrayDotNetCore.MvcApp.Controllers
 {
