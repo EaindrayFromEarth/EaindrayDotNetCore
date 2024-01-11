@@ -2,8 +2,7 @@
 
 using EaindrayDotNetCore.ConsoleApp.AdoDotNetExamples;
 using EaindrayDotNetCore.ConsoleApp.DapperExamples;
-using EaindrayDotNetCore.ConsoleApp.EFCore_Examples;
-using EaindrayDotNetCore.ConsoleApp.HttpClientExamples;
+
 using EaindrayDotNetCore.ConsoleApp.RefitExamples;
 
 

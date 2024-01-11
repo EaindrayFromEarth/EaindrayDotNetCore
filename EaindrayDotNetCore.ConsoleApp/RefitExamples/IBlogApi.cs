@@ -26,4 +26,4 @@ namespace EaindrayDotNetCore.ConsoleApp.RefitExamples
         Task<BlogResponseModel> DeleteBlog(int id);
     }
 }
-}
+
