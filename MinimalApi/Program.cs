@@ -1,11 +1,33 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//builder.Services.AddControllersWithViews().AddJsonOptions(opt =>
+//{
+//    opt.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
+//    opt.JsonSerializerOptions.PropertyNamingPolicy = null;
+//});
 
-builder.Services.AddControllers();
+builder.Services.ConfigureHttpJsonOptions(option =>
+{
+    option.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    option.SerializerOptions.PropertyNamingPolicy = null;
+});
+
+
+// Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<AppDbContext>(opt =>
+{
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+},
+ServiceLifetime.Transient,
+ServiceLifetime.Transient);
 
 var app = builder.Build();
 
@@ -18,8 +40,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
-
-app.MapControllers();
+app.AddBlogService();
 
 app.Run();

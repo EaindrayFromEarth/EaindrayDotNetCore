@@ -1,7 +1,7 @@
-﻿using AEHKLMNSTZDotNetCore.MinimalApi.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MinimalApi.Models;
 
-namespace AEHKLMNSTZDotNetCore.MinimalApi
+namespace MinimalApi
 {
     public class AppDbContext : DbContext
     {

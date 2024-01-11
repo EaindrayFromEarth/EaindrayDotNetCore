@@ -1,7 +1,6 @@
-﻿using AEHKLMNSTZDotNetCore.MinimalApi;
-using AEHKLMNSTZDotNetCore.MinimalApi.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using MinimalApi;
+using MinimalApi.Models;
 
 namespace AEHKLMNSTZDotNetCore.MinimalApi.Features.Blog;
 

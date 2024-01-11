@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace AEHKLMNSTZDotNetCore.MinimalApi.Models
+namespace MinimalApi.Models
 {
     [Table("Tbl_Blog")]
     public class BlogDataModel

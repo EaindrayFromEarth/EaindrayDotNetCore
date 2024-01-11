@@ -1,4 +1,4 @@
-﻿namespace AEHKLMNSTZDotNetCore.MinimalApi.Models
+﻿namespace MinimalApi.Models
 {
     public class BlogViewModel
     {
