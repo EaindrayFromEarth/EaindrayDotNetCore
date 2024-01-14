@@ -1,4 +1,5 @@
-﻿using EaindrayDotNetCore.ConsoleApp.Models;
+﻿using EaindrayDotNetCore.MvcApp.Models;
+using EaindrayDotNetCore.RestApi.Models;
 using Refit;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EaindrayDotNetCore.ConsoleApp.RefitExamples
+namespace EaindrayDotNetCore.MvcApp.Interfaces
 {
     public interface IBlogApi
     {
