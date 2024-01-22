@@ -29,7 +29,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EaindrayDotNetCore.MvcApp",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EaindrayDotNetCore.ThemeMvcApp", "EaindrayDotNetCore.ThemeMvcApp\EaindrayDotNetCore.ThemeMvcApp.csproj", "{789AF124-D9ED-472E-A6B8-18FC959A6D27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalApi", "MinimalApi\MinimalApi.csproj", "{BA1ACBF9-398D-417E-9BA7-B361A50EBA3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinimalApi", "MinimalApi\MinimalApi.csproj", "{BA1ACBF9-398D-417E-9BA7-B361A50EBA3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaindrayDotNetCore.LoggingConsoleApp", "EaindrayDotNetCore.LoggingConsoleApp\EaindrayDotNetCore.LoggingConsoleApp.csproj", "{F79CE475-A112-4637-93B9-909772C849C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{BA1ACBF9-398D-417E-9BA7-B361A50EBA3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA1ACBF9-398D-417E-9BA7-B361A50EBA3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA1ACBF9-398D-417E-9BA7-B361A50EBA3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F79CE475-A112-4637-93B9-909772C849C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F79CE475-A112-4637-93B9-909772C849C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F79CE475-A112-4637-93B9-909772C849C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F79CE475-A112-4637-93B9-909772C849C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
