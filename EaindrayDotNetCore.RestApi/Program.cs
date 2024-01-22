@@ -1,39 +1,69 @@
-using Microsoft.Data.SqlClient;
+using EaindrayDotNetCore.RestApi;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Sinks.MSSqlServer;
+using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews().AddJsonOptions(opt =>
+Assembly assembly = Assembly.GetExecutingAssembly();
+string projectName = assembly.GetName().Name!;
+
+
+string logFilePath = "D:/EaindrayDotNetCore/Logs/" + projectName + ".txt";
+
+Log.Logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                    .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Hour)
+                    .WriteTo
+                       .MSSqlServer(
+                connectionString: "Server=.;Database=TestDb;User ID=sa;Password=sa@123;TrustServerCertificate=True;",
+                sinkOptions: new MSSqlServerSinkOptions
+                {
+                    TableName = "LogEvents",
+                    AutoCreateSqlTable = true
+                })
+         .CreateLogger();
+try
 {
-    opt.JsonSerializerOptions.PropertyNamingPolicy = null;
-    opt.JsonSerializerOptions.PropertyNameCaseInsensitive = false;
-});
-// Add services to the container.
+    Log.Information("Starting web application");
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Host.UseSerilog();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    builder.Services.AddControllers().AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
 
-builder.Services.AddDbContext<EaindrayDotNetCore.RestApi.AppDbContext>(opt =>
-{
-    string connectionString = builder.Configuration.GetConnectionString("DbConnection");
-    opt.UseSqlServer(connectionString);
-});
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+    builder.Services.AddDbContext<AppDbContext>(opt =>
+    {
+        opt.UseSqlServer(builder.Configuration.GetConnectionString("DbConnection"));
+    },
+    ServiceLifetime.Transient,
+    ServiceLifetime.Transient);
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var app = builder.Build();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
