@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaindrayDotNetCore.Log4NetL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaindrayDotNetCore.NLogLoggingConsoleApp", "EaindrayDotNetCore.NLogLoggingConsoleApp\EaindrayDotNetCore.NLogLoggingConsoleApp.csproj", "{0E28CA83-18DA-4A41-84BE-713E7D75D09F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EaindrayDotNetCore.NLoggingMinimalApi", "EaindrayDotNetCore.NLoggingMinimalApi\EaindrayDotNetCore.NLoggingMinimalApi.csproj", "{7D4B7DD5-151C-490E-8C9F-34AD3B3EC6FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{0E28CA83-18DA-4A41-84BE-713E7D75D09F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E28CA83-18DA-4A41-84BE-713E7D75D09F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E28CA83-18DA-4A41-84BE-713E7D75D09F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D4B7DD5-151C-490E-8C9F-34AD3B3EC6FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D4B7DD5-151C-490E-8C9F-34AD3B3EC6FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D4B7DD5-151C-490E-8C9F-34AD3B3EC6FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D4B7DD5-151C-490E-8C9F-34AD3B3EC6FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
